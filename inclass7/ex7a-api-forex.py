@@ -6,9 +6,40 @@
 
 
 def convert_currency(amount, from_currency, to_currency):
-    # This function takes in an amount, the currency of the amount (from_currency), and the currency to convert to (to_currency).
-    # It returns the converted amount based on the real-time exchange rate.
-    pass
+    """
+    Converts amount from from_currency to to_currency using real-time rates
+    via the ExchangeRate-API on RapidAPI.
+    """
+    import requests
+    if from_currency.upper() == to_currency.upper():
+        return float(amount)
+    
+    url = f"https://exchangerate-api.p.rapidapi.com/rapid/latest/{from_currency.upper()}"
+    
+    headers = {
+        'X-RapidAPI-Key': '0d7f1fe33fmsh26df5caf453a834p160688jsndee3bb1a8411',
+        'X-RapidAPI-Host': 'exchangerate-api.p.rapidapi.com'
+    }
+    
+    response = requests.get(url, headers=headers)
+    
+    if response.status_code != 200:
+        raise Exception(f"API request failed: {response.status_code} - {response.text}")
+    
+    data = response.json()
+    
+    if data.get('result') != 'success':
+        error = data.get('error', 'Unknown error')
+        raise Exception(f"API error: {error}")
+    
+    rates = data.get('rates', {})
+    to_currency = to_currency.upper()
+    
+    if to_currency not in rates:
+        raise Exception(f"Target currency '{to_currency}' not supported")
+    
+    rate = rates[to_currency]
+    return round(amount * rate, 2)  # Return rounded to 2 decimal places
 
 
 print(convert_currency(10_000,"HKD","USD"))  # should give roughly 1278
