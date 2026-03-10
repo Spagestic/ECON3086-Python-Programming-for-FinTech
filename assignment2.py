@@ -26,7 +26,16 @@
 # Result:
 #   {"2023-10": 2, "2024-01": 1}  
 def count_monthly_transactions(transactions):  
-    pass  
+    counts = {}
+    for t in transactions:
+        year = t["year"]
+        month = t["month"]
+        key = f"{year}-{month:02d}"
+        if key in counts:
+            counts[key] += 1
+        else:
+            counts[key] = 1
+    return counts
 
 
 
@@ -50,7 +59,16 @@ def count_monthly_transactions(transactions):
 #   ["2023-10-10"]  
 
 def check_daily_spending(transactions, daily_limit):  
-    pass  
+    from collections import defaultdict
+    daily_totals = defaultdict(float)
+    
+    for t in transactions:
+        date = t["date"]
+        daily_totals[date] += t["amount"]
+    
+    exceeding = [date for date, total in daily_totals.items() if total > daily_limit]
+    exceeding.sort()
+    return exceeding
 
 
 
@@ -80,7 +98,20 @@ def check_daily_spending(transactions, daily_limit):
 #   [25.0, 25.0, 25.0, 25.0]  
 
 def split_installments(amount, num_installments):  
-    pass  
+    if num_installments <= 0:
+        return []
+    
+    # Work in cents for precision
+    total_cents = round(amount * 100)
+    base_cents = total_cents // num_installments
+    remainder = total_cents % num_installments
+    
+    installments = []
+    for i in range(num_installments):
+        cents = base_cents + 1 if i < remainder else base_cents
+        installments.append(round(cents / 100, 2))
+    
+    return installments
 
 
 
@@ -133,5 +164,32 @@ def split_installments(amount, num_installments):
 # 
 
 def merge_portfolios(portfolio1, portfolio2):  
-    pass  
+    # Start with a copy of portfolio1 to preserve order
+    merged = {symbol: data.copy() for symbol, data in portfolio1.items()}
+    
+    for symbol, p2 in portfolio2.items():
+        if symbol in merged:
+            # Merge: calculate weighted average
+            p1 = portfolio1[symbol]
+            q1 = p1["quantity"]
+            avg1 = p1["average_price"]
+            q2 = p2["quantity"]
+            avg2 = p2["average_price"]
+            
+            total_q = q1 + q2
+            if total_q > 0:
+                weighted_avg = (q1 * avg1 + q2 * avg2) / total_q
+                avg = round(weighted_avg, 2)
+            else:
+                avg = 0.0
+                
+            merged[symbol] = {
+                "quantity": total_q,
+                "average_price": avg
+            }
+        else:
+            # New stock from portfolio2
+            merged[symbol] = p2.copy()
+    
+    return merged
 
