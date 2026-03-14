@@ -12,8 +12,13 @@ def get_item_price(url):
     }
     response = requests.get(url, headers=headers)
     html = bs4.BeautifulSoup(response.text, 'html.parser')
-
-    return   # TODO Write your code here
+    
+    # Find price - adjust selector based on actual HTML structure
+    price = html.find('span', {'class': 'price'})
+    if price:
+        return price.text.strip()
+    
+    return "Price not found"
 
 item_urls = ["https://www.hktvmall.com/hktv/en/main/%E6%9C%89%E6%A9%9F%E8%BE%B2%E7%A4%BE%E6%9C%89%E9%99%90%E5%85%AC%E5%8F%B8/s/S6061001/%E8%B6%85%E7%B4%9A%E5%B7%BF%E5%A0%B4/%E8%B6%85%E7%B4%9A%E5%B8%82%E5%A0%B4/%E5%8D%B3%E9%A3%9F%E9%BA%B5-%E9%BA%B5-%E6%84%8F%E7%B2%89/%E6%84%8F%E7%B2%89-%E9%80%9A%E5%BF%83%E7%B2%89/%E6%84%8F%E7%B2%89/%E6%9C%89%E6%A9%9F%E8%94%AC%E8%8F%9C%E5%8B%95%E7%89%A9%E9%80%9A%E7%B2%89/p/S6061001_S_92005S",
              "https://www.hktvmall.com/hktv/en/main/Yummy-Bear/s/H0956006/%E8%B6%85%E7%B4%9A%E5%B7%BF%E5%A0%B4/%E8%B6%85%E7%B4%9A%E5%B8%82%E5%A0%B4/%E5%8D%B3%E9%A3%9F%E9%BA%B5-%E9%BA%B5-%E6%84%8F%E7%B2%89/%E6%9D%AF%E9%BA%B5/%E6%9D%AF%E9%BA%B5/%E5%85%83%E7%A5%96%E9%9B%9E%E6%B1%81%E6%B3%A1%E9%BA%B5425g-5%E5%8C%85%E8%A3%9D%E5%B9%B3%E8%A1%8C%E9%80%B2%E5%8F%A3%E4%B8%8D%E5%90%8C%E5%8C%85%E8%A3%9D%E9%9A%A8%E6%A9%9F%E5%87%BA/p/H0956006_S_LT10003711",
@@ -23,5 +28,3 @@ item_urls = ["https://www.hktvmall.com/hktv/en/main/%E6%9C%89%E6%A9%9F%E8%BE%B2%
 for url in item_urls:
     print(get_item_price(url))
     time.sleep(4)  # Do nothing for 4 seconds
-
-
