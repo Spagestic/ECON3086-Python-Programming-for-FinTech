@@ -64,7 +64,15 @@
 #   "2023-q1" or "2023-1" are WRONG answers. The format must be "YYYY-QN".
 #
 def aggregate_quarterly_sales(transactions):
-    pass
+    result = {}
+    for t in transactions:
+        year = t["year"]
+        month = t["month"]
+        amount = t["amount"]
+        quarter = (month - 1) // 3 + 1
+        key = f"{year}-Q{quarter}"
+        result[key] = result.get(key, 0.0) + amount
+    return result
 
 
 
@@ -120,7 +128,18 @@ def aggregate_quarterly_sales(transactions):
 # Note: Food total (200.0) equals the budget (200.0), which is NOT overbudget (must be strictly greater).
 
 def find_overbudget_categories(transactions, budgets):
-    pass
+    spending = {}
+    for t in transactions:
+        cat = t["category"]
+        if cat in budgets:
+            spending[cat] = spending.get(cat, 0.0) + t["amount"]
+            
+    overbudget = []
+    for cat, limit in budgets.items():
+        if spending.get(cat, 0.0) > limit:
+            overbudget.append(cat)
+            
+    return sorted(overbudget)
 
 
 # Question 3 (30 points)
@@ -186,7 +205,20 @@ def find_overbudget_categories(transactions, budgets):
 #   [45.29, 18.88, 11.33]
 #
 def allocate_investment(total_amount, percentages):
-    pass
+    from decimal import Decimal, ROUND_HALF_UP
+    total_dec = Decimal(str(total_amount))
+    allocations = []
+    
+    for p in percentages:
+        p_dec = Decimal(str(p))
+        val = (total_dec * p_dec / Decimal("100")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        allocations.append(val)
+        
+    diff = total_dec - sum(allocations)
+    if diff != Decimal("0.00"):
+        allocations[0] += diff
+        
+    return [float(a) for a in allocations]
 
 
 # Question 4 (20 points)
@@ -255,4 +287,16 @@ def allocate_investment(total_amount, percentages):
 #
 
 def calculate_progressive_tax(income, brackets):
-    pass
+    total_tax = 0.0
+    previous_limit = 0.0
+    for limit, rate in brackets:
+        if income > previous_limit:
+            taxable = min(income, limit) - previous_limit
+            total_tax += taxable * rate
+        previous_limit = limit
+        
+    if income > previous_limit:
+        last_rate = brackets[-1][1]
+        total_tax += (income - previous_limit) * last_rate
+        
+    return round(total_tax, 2)
